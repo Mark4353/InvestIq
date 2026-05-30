@@ -1,0 +1,14 @@
+:root {
+  --register-background: #F5F6FB;
+  --btn-bg: #52555F26;
+  --btn-bg-hover: #FF751D;
+  --register-btn-color: #52555F;
+  --register-btn-hover-color: #FFFFFF;
+  --black: #000000;
+  --white: #FFFFFF;
+  --gray-text: #52555F;
+  --background: #F2F5FC;
+  --costs-red: #E7192E;
+  --income-green: #407946;
+  --revenue-yellow: #FFDAC0;
+}
