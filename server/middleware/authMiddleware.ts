@@ -15,7 +15,7 @@ export const requireAuth = (
   const authorization = request.headers.authorization
 
   if (!authorization?.startsWith('Bearer ')) {
-    response.status(401).json({ message: 'Authorization token is required.' })
+    response.status(401).json({ message: 'Authorization required.' })
     return
   }
 

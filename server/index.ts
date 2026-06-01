@@ -17,6 +17,4 @@ app.get('/api/health', (_request, response) => {
 
 app.use('/api/auth', authRouter)
 
-app.listen(env.port, () => {
-  console.log(`Mock API started on http://localhost:${env.port}`)
-})
+app.listen(env.port)

@@ -23,7 +23,8 @@ export class AuthError extends Error {
 
 const usersByEmail = new Map<string, MockUserRecord>()
 const usersByToken = new Map<string, MockUserRecord>()
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+const emailPattern = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/
 
 const validateCredentials = ({ email, password }: AuthPayload) => {
   const normalizedEmail = email?.trim().toLowerCase()
@@ -32,8 +33,13 @@ const validateCredentials = ({ email, password }: AuthPayload) => {
     throw new AuthError(400, 'Enter a valid email.')
   }
 
-  if (!password || password.length < 6) {
-    throw new AuthError(400, 'Password must be at least 6 characters.')
+  const passwordPolicy = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/
+
+  if (!password || !passwordPolicy.test(password)) {
+    throw new AuthError(
+      400,
+      'Password must be at least 8 chars with upper, lower, number and symbol.'
+    )
   }
 
   return {
@@ -60,7 +66,7 @@ export const registerUser = async (payload: AuthPayload) => {
   const existingUser = usersByEmail.get(email)
 
   if (existingUser) {
-    throw new AuthError(409, 'Email is already registered.')
+    throw new AuthError(409, 'Email already registered.')
   }
 
   const user: MockUserRecord = {
@@ -81,9 +87,25 @@ export const registerUser = async (payload: AuthPayload) => {
 export const loginUser = async (payload: AuthPayload) => {
   const { email, password } = validateCredentials(payload)
   const user = usersByEmail.get(email)
+ 
+  if (!user) {
+    const newUser: MockUserRecord = {
+      id: randomUUID(),
+      email,
+      password,
+      createdAt: new Date().toISOString(),
+    }
 
-  if (!user || user.password !== password) {
-    throw new AuthError(401, 'Invalid email or password.')
+    usersByEmail.set(email, newUser)
+
+    return {
+      token: createToken(newUser),
+      user: serializeUser(newUser),
+    }
+  }
+
+  if (user.password !== password) {
+    throw new AuthError(401, 'Incorrect password.')
   }
 
   return {

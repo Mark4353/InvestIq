@@ -1,16 +1,21 @@
 import type { FormEvent } from 'react'
 import { useAuth } from '../../../hooks/useAuth'
 import { useAuthForm } from '../../../hooks/useAuthForm'
+import { useNavigate } from 'react-router-dom'
 import './Register.css'
 
 const Register = () => {
   const { user, logout } = useAuth()
   const { form, status, message, isLoading, updateField, submitRegister } =
     useAuthForm()
+  const navigate = useNavigate()
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    void submitRegister()
+    const ok = await submitRegister()
+    if (ok) {
+      navigate('/home')
+    }
   }
 
   return (

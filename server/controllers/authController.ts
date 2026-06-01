@@ -6,8 +6,6 @@ const sendError = (response: Response, error: unknown) => {
     response.status(error.statusCode).json({ message: error.message })
     return
   }
-
-  console.error(error)
   response.status(500).json({ message: 'Internal server error.' })
 }
 
