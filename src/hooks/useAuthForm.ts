@@ -57,7 +57,8 @@ export function useAuthForm() {
 
       const data = await response.json()
       if (!response.ok) {
-        throw new Error(data?.message || 'Registration failed.')
+          const errMsg = data?.message || JSON.stringify(data) || 'Registration failed.'
+          throw new Error(errMsg)
       }
 
       const user: AuthUser = {

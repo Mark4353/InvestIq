@@ -29,9 +29,7 @@ ensureTables().catch((err) => {
   console.error('Failed to ensure DB tables:', err)
 })
 
-if (pool) {
-  console.log('Postgres pool initialized')
-}
+// pool initialized when DATABASE_URL is provided
 
 export const query = (text: string, params?: any[]) => {
   if (!pool) {
