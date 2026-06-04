@@ -1,0 +1,32 @@
+/* Global content container: centers page content and provides consistent padding */
+.container {
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 1180px;
+	margin-left: auto;
+	margin-right: auto;
+	padding-left: 20px;
+	padding-right: 20px;
+	padding-top: 24px;
+	padding-bottom: 24px;
+}
+
+/* Optional modifier to center children horizontally */
+.container--center {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+}
+
+/* Full-bleed container that keeps inner max-width but spans background */
+.container--full-bleed {
+	width: 100%;
+	padding-left: 16px;
+	padding-right: 16px;
+}
+
+@media (max-width: 640px) {
+	.container { padding-left: 12px; padding-right: 12px; }
+}
+

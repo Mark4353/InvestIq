@@ -1,0 +1,16 @@
+/* Tab button style for Costs */
+.hp-tab{
+	border-radius: 20px;
+	padding: 8px 18px;
+	border: none;
+	background: transparent;
+	color: #ff7a00;
+	font-weight:700;
+	cursor: pointer;
+}
+.hp-tab.active{
+	background: linear-gradient(180deg,#ff7a00,#ff5a00);
+	color: #fff;
+	box-shadow: 0 6px 18px rgba(255,122,0,0.18);
+}
+

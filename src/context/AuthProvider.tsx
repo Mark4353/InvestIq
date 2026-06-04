@@ -1,5 +1,6 @@
 import {
   useCallback,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -41,6 +42,31 @@ const readStoredSession = (): Pick<AuthContextValue, 'token' | 'user'> => {
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSessionState] = useState(readStoredSession)
+
+  useEffect(() => {
+    const tryRefresh = async () => {
+      if (session.token && !session.user) {
+        try {
+          const res = await fetch(`/api/auth/me`, {
+            headers: { Authorization: `Bearer ${session.token}` },
+          })
+          if (res.ok) {
+            const data = await res.json()
+            setSessionState({ token: session.token, user: data.user })
+          } else {
+            // token invalid -> clear session
+            localStorage.removeItem(authStorageKey)
+            setSessionState({ token: null, user: null })
+          }
+        } catch {
+          // ignore network errors for now
+        }
+      }
+    }
+
+    tryRefresh()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const setSession = useCallback((token: string, user: AuthUser) => {
     const nextSession = {

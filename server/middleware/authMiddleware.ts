@@ -7,7 +7,7 @@ export interface AuthRequest extends Request {
   }
 }
 
-export const requireAuth = (
+export const requireAuth = async (
   request: AuthRequest,
   response: Response,
   next: NextFunction,
@@ -20,7 +20,7 @@ export const requireAuth = (
   }
 
   const token = authorization.slice('Bearer '.length)
-  const user = getUserByToken(token)
+  const user = await getUserByToken(token)
 
   if (!user) {
     response.status(401).json({ message: 'Invalid token.' })

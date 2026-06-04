@@ -23,7 +23,7 @@ const Header = () => {
       <div className="header-actions">
         {user ? (
           <div className="user-area">
-            <span className="welcome">Welcome, {displayName}</span>
+            <span className="welcome"><img src="../../img/user-icon.png" alt="User Icon" /> {displayName}</span>
             <button className="btn logout" onClick={handleLogout}>
               Logout
             </button>

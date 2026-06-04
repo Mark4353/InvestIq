@@ -2,6 +2,7 @@ import cors from 'cors'
 import express from 'express'
 import { env } from './config/env.ts'
 import { authRouter } from './routes/authRoutes.ts'
+import './db'
 
 const app = express()
 

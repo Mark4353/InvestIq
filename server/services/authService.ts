@@ -1,15 +1,12 @@
 import { randomUUID } from 'node:crypto'
+import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
+import { query } from '../db'
+import { db as envDb } from '../config/env'
 
 interface AuthPayload {
   email?: string
   password?: string
-}
-
-interface MockUserRecord {
-  id: string
-  email: string
-  password: string
-  createdAt: string
 }
 
 export class AuthError extends Error {
@@ -20,9 +17,6 @@ export class AuthError extends Error {
     this.statusCode = statusCode
   }
 }
-
-const usersByEmail = new Map<string, MockUserRecord>()
-const usersByToken = new Map<string, MockUserRecord>()
 
 const emailPattern = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/
 
@@ -48,72 +42,74 @@ const validateCredentials = ({ email, password }: AuthPayload) => {
   }
 }
 
-const createToken = (user: MockUserRecord) => {
-  const token = `mock_${randomUUID()}`
-  usersByToken.set(token, user)
-
-  return token
+const createToken = (userId: string) => {
+  const secret = envDb.jwtSecret || 'change_me'
+  return jwt.sign({ sub: userId }, secret, { expiresIn: '7d' })
 }
 
-const serializeUser = (user: MockUserRecord) => ({
-  id: user.id,
-  email: user.email,
-  createdAt: user.createdAt,
+const serializeUser = (row: any) => ({
+  id: row.id,
+  email: row.email,
+  createdAt: row.created_at,
 })
 
 export const registerUser = async (payload: AuthPayload) => {
   const { email, password } = validateCredentials(payload)
-  const existingUser = usersByEmail.get(email)
 
-  if (existingUser) {
+  const { rows: existing } = await query('SELECT id FROM users WHERE email = $1', [email])
+  if (existing.length > 0) {
     throw new AuthError(409, 'Email already registered.')
   }
 
-  const user: MockUserRecord = {
-    id: randomUUID(),
-    email,
-    password,
-    createdAt: new Date().toISOString(),
-  }
+  const hashed = await bcrypt.hash(password, 10)
+  const id = randomUUID()
 
-  usersByEmail.set(email, user)
+  const { rows } = await query(
+    'INSERT INTO users(id, email, password) VALUES($1, $2, $3) RETURNING id, email, created_at',
+    [id, email, hashed]
+  )
+
+  const user = rows[0]
 
   return {
-    token: createToken(user),
+    token: createToken(user.id),
     user: serializeUser(user),
   }
 }
 
 export const loginUser = async (payload: AuthPayload) => {
   const { email, password } = validateCredentials(payload)
-  const user = usersByEmail.get(email)
- 
-  if (!user) {
-    const newUser: MockUserRecord = {
-      id: randomUUID(),
-      email,
-      password,
-      createdAt: new Date().toISOString(),
-    }
 
-    usersByEmail.set(email, newUser)
-
-    return {
-      token: createToken(newUser),
-      user: serializeUser(newUser),
-    }
+  const { rows } = await query('SELECT id, email, password, created_at FROM users WHERE email = $1', [email])
+  if (rows.length === 0) {
+    throw new AuthError(404, 'User not found.')
   }
 
-  if (user.password !== password) {
+  const user = rows[0]
+  const match = await bcrypt.compare(password, user.password)
+  if (!match) {
     throw new AuthError(401, 'Incorrect password.')
   }
 
   return {
-    token: createToken(user),
+    token: createToken(user.id),
     user: serializeUser(user),
   }
 }
 
-export const getUserByToken = (token: string) => {
-  return usersByToken.get(token)
+export const getUserByToken = async (token: string) => {
+  try {
+    const secret = envDb.jwtSecret || 'change_me'
+    const payload = jwt.verify(token, secret) as any
+    const userId = payload.sub
+    const { rows } = await query('SELECT id, email, created_at FROM users WHERE id = $1', [userId])
+    return rows[0] ?? null
+  } catch {
+    return null
+  }
+}
+
+export const getUserById = async (id: string) => {
+  const { rows } = await query('SELECT id, email, created_at FROM users WHERE id = $1', [id])
+  return rows[0] ?? null
 }

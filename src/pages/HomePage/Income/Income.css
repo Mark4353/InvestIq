@@ -1,0 +1,15 @@
+/* Tab button style for Income */
+.hp-tab{
+	border-radius: 20px;
+	padding: 8px 18px;
+	border: none;
+	background: transparent;
+	color: #666;
+	font-weight:700;
+	cursor: pointer;
+}
+.hp-tab.active{
+	background: rgba(255,255,255,0.9);
+	color: #111;
+}
+

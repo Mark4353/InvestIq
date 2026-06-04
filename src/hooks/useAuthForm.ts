@@ -12,7 +12,7 @@ const initialForm: RegisterFormData = {
   password: '',
 }
 
-const mockApiUsersUrl = import.meta.env.VITE_MOCKAPI_USERS_URL as string | undefined
+const apiBase = (import.meta.env.VITE_API_BASE as string | undefined) ?? ''
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const readMockApiResponse = async (response: Response): Promise<AuthUser> => {
@@ -88,53 +88,24 @@ export function useAuthForm() {
     setMessage('')
 
     try {
-      const queryUrl = `${ensureMockApiUrl()}?email=${encodeURIComponent(email)}`
-      const existingResponse = await fetch(queryUrl)
-
-      let existingList: Array<Partial<AuthUser>> = []
-
-      if (!existingResponse.ok) {
-        if (existingResponse.status === 404) {
-          existingList = []
-        } else {
-          throw new Error('Failed to check users.')
-        }
-      } else {
-        existingList = (await existingResponse.json()) as Array<Partial<AuthUser>>
-      }
-
-      if (existingList.length > 0) {
-        const existing = existingList[0]
-        if (existing.password === form.password) {
-          const user = await readMockApiResponse(new Response(JSON.stringify(existing), { status: 200 }))
-          setSession(`mockapi_${user.id}`, user)
-          setStatus('success')
-          setMessage('Logged in.')
-          setForm(initialForm)
-          return true
-        }
-
-        setStatus('error')
-        setMessage('Email already registered with different password.')
-        return false
-      }
-
-      const response = await fetch(ensureMockApiUrl(), {
+      const response = await fetch(`${apiBase}/api/auth/register`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password: form.password,
-          income: 0,
-          costs: 0,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: form.password }),
       })
 
-      const user = await readMockApiResponse(response)
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data?.message || 'Registration failed.')
+      }
 
-      setSession(`mockapi_${user.id}`, user)
+      const user: AuthUser = {
+        id: data.user.id,
+        email: data.user.email,
+        createdAt: data.user.createdAt,
+      }
+
+      setSession(data.token, user)
       setStatus('success')
       setMessage('Account created.')
       setForm(initialForm)
@@ -142,6 +113,42 @@ export function useAuthForm() {
     } catch (error) {
       setStatus('error')
       setMessage(error instanceof Error ? error.message : 'Registration failed.')
+      return false
+    }
+  }
+
+  const submitLogin = async (): Promise<boolean> => {
+    const email = form.email.trim().toLowerCase()
+
+    if (!emailPattern.test(email)) {
+      setStatus('error')
+      setMessage('Enter a valid email.')
+      return false
+    }
+
+    setStatus('loading')
+    setMessage('')
+
+    try {
+      const response = await fetch(`${apiBase}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: form.password }),
+      })
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data?.message || 'Login failed.')
+      }
+
+      const user: AuthUser = { id: data.user.id, email: data.user.email, createdAt: data.user.createdAt }
+      setSession(data.token, user)
+      setStatus('success')
+      setMessage('Logged in.')
+      setForm(initialForm)
+      return true
+    } catch (error) {
+      setStatus('error')
+      setMessage(error instanceof Error ? error.message : 'Login failed.')
       return false
     }
   }
