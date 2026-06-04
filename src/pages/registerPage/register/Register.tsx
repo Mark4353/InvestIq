@@ -6,16 +6,23 @@ import './Register.css'
 
 const Register = () => {
   const { user, logout } = useAuth()
-  const { form, status, message, isLoading, updateField, submitRegister } =
+  const { form, status, message, isLoading, updateField, submitRegister, submitLogin } =
     useAuthForm()
   const navigate = useNavigate()
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    // no-op; specific actions use buttons below
+  }
+
+  const handleRegister = async () => {
     const ok = await submitRegister()
-    if (ok) {
-      navigate('/home')
-    }
+    if (ok) navigate('/home')
+  }
+
+  const handleLogin = async () => {
+    const logged = await submitLogin()
+    if (logged) navigate('/home')
   }
 
   return (
@@ -75,9 +82,23 @@ const Register = () => {
 
             {message && <p className={`form-message ${status}`}>{message}</p>}
 
-            <div className="actions">
-              <button className="btn primary" type="submit" disabled={isLoading}>
-                {isLoading ? 'Please wait...' : 'Register/Log in'}
+            <div className="actions" style={{ display: 'flex', gap: 8 }}>
+              <button
+                className="btn primary"
+                type="button"
+                onClick={handleRegister}
+                disabled={isLoading}
+              >
+                {isLoading ? 'Please wait...' : 'Register'}
+              </button>
+
+              <button
+                className="btn secondary"
+                type="button"
+                onClick={handleLogin}
+                disabled={isLoading}
+              >
+                {isLoading ? 'Please wait...' : 'Login'}
               </button>
             </div>
           </form>
