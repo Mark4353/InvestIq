@@ -7,7 +7,7 @@ if (!envDb.databaseUrl) {
 
 const pool: Pool | null = envDb.databaseUrl ? new Pool({ connectionString: envDb.databaseUrl }) : null
 
-// Ensure users table exists (only when pool is configured)
+
 const ensureTables = async () => {
   if (!pool) return
   const client = await pool.connect()
@@ -29,7 +29,7 @@ ensureTables().catch((err) => {
   console.error('Failed to ensure DB tables:', err)
 })
 
-// pool initialized when DATABASE_URL is provided
+
 
 export const query = (text: string, params?: any[]) => {
   if (!pool) {

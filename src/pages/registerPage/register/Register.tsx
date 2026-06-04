@@ -12,7 +12,7 @@ const Register = () => {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    // no-op; specific actions use buttons below
+    
   }
 
   const handleRegister = async () => {

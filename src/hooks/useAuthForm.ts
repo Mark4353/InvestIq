@@ -14,10 +14,8 @@ const initialForm: RegisterFormData = {
 
 const apiBase = (import.meta.env.VITE_API_BASE as string | undefined) ?? ''
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-// Matches backend password policy: min 8 chars, upper, lower, number, symbol
-const passwordPolicy = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/
 
-// legacy mock helpers removed — use real API endpoints via `VITE_API_BASE`
+const passwordPolicy = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/
 
 export function useAuthForm() {
   const { setSession } = useAuth()

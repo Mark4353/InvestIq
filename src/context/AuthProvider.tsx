@@ -54,18 +54,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const data = await res.json()
             setSessionState({ token: session.token, user: data.user })
           } else {
-            // token invalid -> clear session
+            
             localStorage.removeItem(authStorageKey)
             setSessionState({ token: null, user: null })
           }
         } catch {
-          // ignore network errors for now
+          
         }
       }
     }
 
     tryRefresh()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [])
 
   const setSession = useCallback((token: string, user: AuthUser) => {

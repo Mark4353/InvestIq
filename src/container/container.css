@@ -1,4 +1,4 @@
-/* Global content container: centers page content and provides consistent padding */
+
 .container {
 	box-sizing: border-box;
 	width: 100%;
@@ -11,7 +11,7 @@
 	padding-bottom: 24px;
 }
 
-/* Optional modifier to center children horizontally */
+
 .container--center {
 	display: flex;
 	flex-direction: column;
@@ -19,7 +19,7 @@
 	justify-content: flex-start;
 }
 
-/* Full-bleed container that keeps inner max-width but spans background */
+
 .container--full-bleed {
 	width: 100%;
 	padding-left: 16px;
