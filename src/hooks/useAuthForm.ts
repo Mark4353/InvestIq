@@ -14,6 +14,8 @@ const initialForm: RegisterFormData = {
 
 const apiBase = (import.meta.env.VITE_API_BASE as string | undefined) ?? ''
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+// Matches backend password policy: min 8 chars, upper, lower, number, symbol
+const passwordPolicy = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/
 
 // legacy mock helpers removed — use real API endpoints via `VITE_API_BASE`
 
@@ -39,9 +41,11 @@ export function useAuthForm() {
       return false
     }
 
-    if (form.password.length < 6) {
+    if (!passwordPolicy.test(form.password)) {
       setStatus('error')
-      setMessage('Password must be at least 6 characters.')
+      setMessage(
+        'Password must be at least 8 chars with upper, lower, number and symbol.'
+      )
       return false
     }
 
