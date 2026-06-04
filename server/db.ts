@@ -5,10 +5,11 @@ if (!envDb.databaseUrl) {
   console.warn('DATABASE_URL not set; Postgres disabled')
 }
 
-const pool = new Pool({ connectionString: envDb.databaseUrl })
+const pool: Pool | null = envDb.databaseUrl ? new Pool({ connectionString: envDb.databaseUrl }) : null
 
-// Ensure users table exists
+// Ensure users table exists (only when pool is configured)
 const ensureTables = async () => {
+  if (!pool) return
   const client = await pool.connect()
   try {
     await client.query(`
@@ -28,5 +29,11 @@ ensureTables().catch((err) => {
   console.error('Failed to ensure DB tables:', err)
 })
 
-export const query = (text: string, params?: any[]) => pool.query(text, params)
+export const query = (text: string, params?: any[]) => {
+  if (!pool) {
+    throw new Error('Postgres not configured')
+  }
+  return pool.query(text, params)
+}
+
 export default pool
