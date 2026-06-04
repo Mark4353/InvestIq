@@ -29,6 +29,10 @@ ensureTables().catch((err) => {
   console.error('Failed to ensure DB tables:', err)
 })
 
+if (pool) {
+  console.log('Postgres pool initialized')
+}
+
 export const query = (text: string, params?: any[]) => {
   if (!pool) {
     throw new Error('Postgres not configured')

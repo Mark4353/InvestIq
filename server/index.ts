@@ -1,6 +1,6 @@
 import cors from 'cors'
 import express from 'express'
-import { env } from './config/env.ts'
+import { env, db as envDb } from './config/env.ts'
 import { authRouter } from './routes/authRoutes.ts'
 import './db'
 
@@ -12,7 +12,7 @@ app.use(express.json())
 app.get('/api/health', (_request, response) => {
   response.status(200).json({
     status: 'ok',
-    mode: 'mock',
+    mode: envDb.databaseUrl ? 'db' : 'mock',
   })
 })
 
