@@ -47,11 +47,14 @@ const createToken = (userId: string) => {
   return jwt.sign({ sub: userId }, secret, { expiresIn: '7d' })
 }
 
-const serializeUser = (row: any) => ({
-  id: row.id,
-  email: row.email,
-  createdAt: row.created_at,
-})
+const serializeUser = (row: unknown) => {
+  const r = row as Record<string, unknown>
+  return {
+    id: String(r['id'] ?? ''),
+    email: String(r['email'] ?? ''),
+    createdAt: String(r['created_at'] ?? ''),
+  }
+}
 
 export const registerUser = async (payload: AuthPayload) => {
   const { email, password } = validateCredentials(payload)
@@ -100,8 +103,9 @@ export const loginUser = async (payload: AuthPayload) => {
 export const getUserByToken = async (token: string) => {
   try {
     const secret = envDb.jwtSecret || 'change_me'
-    const payload = jwt.verify(token, secret) as any
-    const userId = payload.sub
+    const payload = jwt.verify(token, secret) as unknown
+    const p = payload as Record<string, unknown>
+    const userId = String(p['sub'] ?? '')
     const { rows } = await query('SELECT id, email, created_at FROM users WHERE id = $1', [userId])
     return rows[0] ?? null
   } catch {

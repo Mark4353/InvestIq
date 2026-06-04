@@ -5,6 +5,6 @@ export const env = {
 }
 
 export const db = {
-  databaseUrl: process.env.DATABASE_URL ?? process.env.DATABASE_URL?.replace?.('postgresql://', 'postgresql://') ?? null,
-  jwtSecret: process.env.JWT_SECRET ?? 'change_me',
+  databaseUrl: (process.env.DATABASE_URL as string | undefined) ?? null,
+  jwtSecret: (process.env.JWT_SECRET as string | undefined) ?? 'change_me',
 }

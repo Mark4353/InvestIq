@@ -7,10 +7,9 @@ import Container from '../../container/Container'
 
 type Props = {
   initialTransactions?: Transaction[]
-  user?: any
 }
 
-const HomePage: React.FC<Props> = ({ initialTransactions = [], user = null }) => {
+const HomePage: React.FC<Props> = ({ initialTransactions = [] }) => {
   const [tab, setTab] = useState<"expenses" | "income">("expenses");
   const [date, setDate] = useState("");
   const [description, setDescription] = useState("");
@@ -65,10 +64,8 @@ const HomePage: React.FC<Props> = ({ initialTransactions = [], user = null }) =>
               transactions={transactions}
               date={date}
               description={description}
-              amount={amount}
               onDateChange={setDate}
               onDescriptionChange={setDescription}
-              onAmountChange={setAmount}
               onAdd={handleAdd}
               onClear={handleClear}
             />
@@ -77,10 +74,8 @@ const HomePage: React.FC<Props> = ({ initialTransactions = [], user = null }) =>
               transactions={transactions}
               date={date}
               description={description}
-              amount={amount}
               onDateChange={setDate}
               onDescriptionChange={setDescription}
-              onAmountChange={setAmount}
               onAdd={handleAdd}
               onClear={handleClear}
             />

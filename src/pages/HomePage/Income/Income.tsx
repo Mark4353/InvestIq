@@ -1,6 +1,6 @@
 import React from 'react'
 import './Income.css'
-import type { Transaction } from '../../types'
+import type { Transaction } from '../../../types'
 
 type TabProps = {
 	active?: boolean
@@ -19,10 +19,8 @@ type ViewProps = {
 	transactions: Transaction[]
 	date: string
 	description: string
-	amount: string
 	onDateChange: (v: string) => void
 	onDescriptionChange: (v: string) => void
-	onAmountChange: (v: string) => void
 	onAdd: () => void
 	onClear: () => void
 }
@@ -31,10 +29,8 @@ export const IncomeView: React.FC<ViewProps> = ({
 	transactions,
 	date,
 	description,
-	amount,
 	onDateChange,
 	onDescriptionChange,
-	onAmountChange,
 	onAdd,
 	onClear,
 }) => {

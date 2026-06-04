@@ -15,46 +15,7 @@ const initialForm: RegisterFormData = {
 const apiBase = (import.meta.env.VITE_API_BASE as string | undefined) ?? ''
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-const readMockApiResponse = async (response: Response): Promise<AuthUser> => {
-  const text = await response.text()
-
-  if (!text) {
-    throw new Error('Empty server response.')
-  }
-
-  let data: Partial<AuthUser> & { message?: string }
-
-  try {
-    data = JSON.parse(text) as Partial<AuthUser> & { message?: string }
-  } catch {
-    throw new Error('Invalid server response.')
-  }
-
-  if (!response.ok) {
-    throw new Error(data.message || 'Request failed.')
-  }
-
-  if (!data.id || !data.email) {
-    throw new Error('Incomplete user data.')
-  }
-
-  return {
-    id: data.id,
-    email: data.email,
-    password: data.password,
-    createdAt: data.createdAt,
-    income: Number(data.income ?? 0),
-    costs: Number(data.costs ?? 0),
-  }
-}
-
-const ensureMockApiUrl = () => {
-  if (!mockApiUsersUrl) {
-    throw new Error('Server URL not set.')
-  }
-
-  return mockApiUsersUrl
-}
+// legacy mock helpers removed — use real API endpoints via `VITE_API_BASE`
 
 export function useAuthForm() {
   const { setSession } = useAuth()
@@ -160,5 +121,6 @@ export function useAuthForm() {
     isLoading: status === 'loading',
     updateField,
     submitRegister,
+    submitLogin,
   }
 }
