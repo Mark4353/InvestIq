@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useAuth } from '../../hooks/useAuth'
 import "./HomePage.css";
 import type { Transaction } from "../../types"
 import ExpensesTab, { CostsView } from './Costs/Costs'
@@ -16,20 +17,60 @@ const HomePage: React.FC<Props> = ({ initialTransactions = [] }) => {
   const [amount, setAmount] = useState("");
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
 
+  const { token } = useAuth()
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch('/api/transactions', {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        })
+        if (!res.ok) return
+        const data = await res.json()
+        const tx = (data.transactions ?? []).map((t: any) => ({
+          ...t,
+          amount: Number(t.amount),
+        }))
+        setTransactions(tx)
+      } catch (err) {
+        console.error('Failed to load transactions', err)
+      }
+    }
+    load()
+  }, [token])
+
   const handleAdd = () => {
     if (!date || !description || !amount) return;
-    const t: Transaction = {
-      id: String(Date.now()),
+    const payload = {
       date,
       description,
-      category: tab === "expenses" ? "Default" : "Income",
+      category: tab === "expenses" ? 'Default' : 'Income',
       amount: Number(amount),
       type: tab === "expenses" ? "expense" : "income",
-    };
-    setTransactions((prev) => [t, ...prev]);
-    setDate("");
-    setDescription("");
-    setAmount("");
+    }
+
+    fetch('/api/transactions', {
+      method: 'POST',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, token ? { Authorization: `Bearer ${token}` } : {}),
+      body: JSON.stringify(payload),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        const raw = data.transaction
+        const t: Transaction = {
+          id: raw.id,
+          date: raw.date,
+          description: raw.description ?? '',
+          category: raw.category ?? '',
+          amount: Number(raw.amount),
+          type: raw.type,
+        }
+        setTransactions((prev) => [t, ...prev])
+        setDate("");
+        setDescription("");
+        setAmount("");
+      })
+      .catch((err) => console.error('Failed to create transaction', err))
   };
 
   const handleClear = () => {

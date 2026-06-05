@@ -20,6 +20,18 @@ const ensureTables = async () => {
         created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
       )
     `)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS transactions (
+        id UUID PRIMARY KEY,
+        user_id UUID,
+        date DATE NOT NULL,
+        description TEXT,
+        category TEXT,
+        amount NUMERIC NOT NULL,
+        type TEXT NOT NULL CHECK (type IN ('income', 'expense')),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+      )
+    `)
   } finally {
     client.release()
   }
