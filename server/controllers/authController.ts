@@ -2,6 +2,7 @@ import type { Request, Response } from 'express'
 import { AuthError, loginUser, registerUser, getUserById } from '../services/authService.ts'
 
 const sendError = (response: Response, error: unknown) => {
+  console.error(error)
   if (error instanceof AuthError) {
     response.status(error.statusCode).json({ message: error.message })
     return
@@ -11,6 +12,8 @@ const sendError = (response: Response, error: unknown) => {
 
 export const register = async (request: Request, response: Response) => {
   try {
+    console.log('REGISTER HEADERS:', request.headers)
+    console.log('REGISTER BODY:', request.body)
     const result = await registerUser(request.body)
     response.status(201).json(result)
   } catch (error) {

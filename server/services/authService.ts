@@ -4,6 +4,10 @@ import jwt from 'jsonwebtoken'
 import { query } from '../db'
 import { db as envDb } from '../config/env'
 
+// In-memory mock store used when Postgres is not configured (development)
+type MockUser = { id: string; email: string; password: string; created_at: string }
+const mockUsers = new Map<string, MockUser>()
+
 interface AuthPayload {
   email?: string
   password?: string
@@ -59,6 +63,24 @@ const serializeUser = (row: unknown) => {
 export const registerUser = async (payload: AuthPayload) => {
   const { email, password } = validateCredentials(payload)
 
+  if (!envDb.databaseUrl) {
+    // mock flow
+    for (const u of mockUsers.values()) {
+      if (u.email === email) throw new AuthError(409, 'Email already registered.')
+    }
+
+    const hashed = await bcrypt.hash(password, 10)
+    const id = randomUUID()
+    const created_at = new Date().toISOString()
+    const user: MockUser = { id, email, password: hashed, created_at }
+    mockUsers.set(id, user)
+
+    return {
+      token: createToken(id),
+      user: serializeUser(user),
+    }
+  }
+
   const { rows: existing } = await query('SELECT id FROM users WHERE email = $1', [email])
   if (existing.length > 0) {
     throw new AuthError(409, 'Email already registered.')
@@ -82,6 +104,14 @@ export const registerUser = async (payload: AuthPayload) => {
 
 export const loginUser = async (payload: AuthPayload) => {
   const { email, password } = validateCredentials(payload)
+
+  if (!envDb.databaseUrl) {
+    const found = Array.from(mockUsers.values()).find((u) => u.email === email)
+    if (!found) throw new AuthError(404, 'User not found.')
+    const match = await bcrypt.compare(password, found.password)
+    if (!match) throw new AuthError(401, 'Incorrect password.')
+    return { token: createToken(found.id), user: serializeUser(found) }
+  }
 
   const { rows } = await query('SELECT id, email, password, created_at FROM users WHERE email = $1', [email])
   if (rows.length === 0) {
@@ -114,6 +144,9 @@ export const getUserByToken = async (token: string) => {
 }
 
 export const getUserById = async (id: string) => {
+  if (!envDb.databaseUrl) {
+    return mockUsers.get(id) ?? null
+  }
   const { rows } = await query('SELECT id, email, created_at FROM users WHERE id = $1', [id])
   return rows[0] ?? null
 }
