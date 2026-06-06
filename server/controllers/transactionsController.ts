@@ -50,7 +50,8 @@ export const remove = async (req: AuthRequest, res: Response) => {
       return
     }
 
-    const { id } = req.params
+    let { id } = req.params
+    if (Array.isArray(id)) id = id[0]
     if (!id) {
       res.status(400).json({ message: 'Missing id' })
       return

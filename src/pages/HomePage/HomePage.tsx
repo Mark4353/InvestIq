@@ -22,15 +22,14 @@ const HomePage: React.FC<Props> = ({ initialTransactions = [] }) => {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('/api/transactions', {
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-        })
+        const headers: HeadersInit | undefined = token ? { Authorization: `Bearer ${token}` } : undefined
+        const res = await fetch('/api/transactions', { headers })
         if (!res.ok) return
         const data = await res.json()
-        const tx = (data.transactions ?? []).map((t: any) => ({
-          ...t,
-          amount: Number(t.amount),
-        }))
+        const tx = (data.transactions ?? []).map((t: unknown) => {
+          const item = t as Partial<Transaction> & { amount?: unknown }
+          return { ...(item as Transaction), amount: Number(item.amount ?? 0) } as Transaction
+        })
         setTransactions(tx)
       } catch (err) {
         console.error('Failed to load transactions', err)
@@ -49,9 +48,12 @@ const HomePage: React.FC<Props> = ({ initialTransactions = [] }) => {
       type: tab === "expenses" ? "expense" : "income",
     }
 
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (token) headers.Authorization = `Bearer ${token}`
+
     fetch('/api/transactions', {
       method: 'POST',
-      headers: Object.assign({ 'Content-Type': 'application/json' }, token ? { Authorization: `Bearer ${token}` } : {}),
+      headers,
       body: JSON.stringify(payload),
     })
       .then((r) => r.json())

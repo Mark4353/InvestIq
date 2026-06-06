@@ -3,12 +3,14 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": "https://mark4353.github.io/InvestIq",
   "scripts": {
     "dev": "vite",
     "server": "tsx server/index.ts",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -39,6 +41,7 @@
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
+    "gh-pages": "^6.3.0",
     "globals": "^17.6.0",
     "strip-comments": "^2.0.1",
     "tsx": "^4.20.6",
