@@ -47,7 +47,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const tryRefresh = async () => {
       if (session.token && !session.user) {
         try {
-          const res = await fetch(`/api/auth/me`, {
+          const apiBase = (import.meta.env.VITE_API_BASE as string | undefined) ?? ''
+          const res = await fetch(`${apiBase}/api/auth/me`, {
             headers: { Authorization: `Bearer ${session.token}` },
           })
           if (res.ok) {

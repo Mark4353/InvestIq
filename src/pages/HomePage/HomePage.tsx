@@ -18,12 +18,13 @@ const HomePage: React.FC<Props> = ({ initialTransactions = [] }) => {
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
 
   const { token } = useAuth()
+  const apiBase = (import.meta.env.VITE_API_BASE as string | undefined) ?? ''
 
   useEffect(() => {
     const load = async () => {
       try {
         const headers: HeadersInit | undefined = token ? { Authorization: `Bearer ${token}` } : undefined
-        const res = await fetch('/api/transactions', { headers })
+        const res = await fetch(`${apiBase}/api/transactions`, { headers })
         if (!res.ok) return
         const data = await res.json()
         const tx = (data.transactions ?? []).map((t: unknown) => {
@@ -51,7 +52,7 @@ const HomePage: React.FC<Props> = ({ initialTransactions = [] }) => {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' }
     if (token) headers.Authorization = `Bearer ${token}`
 
-    fetch('/api/transactions', {
+    fetch(`${apiBase}/api/transactions`, {
       method: 'POST',
       headers,
       body: JSON.stringify(payload),

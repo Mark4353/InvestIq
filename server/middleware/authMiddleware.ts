@@ -14,6 +14,10 @@ export const requireAuth = async (
 ) => {
   const authorization = request.headers.authorization
 
+  if (!authorization) {
+    console.warn('Missing Authorization header:', request.headers)
+  }
+
   if (!authorization?.startsWith('Bearer ')) {
     response.status(401).json({ message: 'Authorization required.' })
     return

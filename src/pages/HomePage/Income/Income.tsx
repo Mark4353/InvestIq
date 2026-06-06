@@ -38,7 +38,9 @@ export const IncomeView: React.FC<ViewProps> = ({
 		<>
 			<div className="hp-entry">
 				<input type="date" value={date} onChange={(e) => onDateChange(e.target.value)} />
-				<input className="desc" placeholder="Опис товару" value={description} onChange={(e) => onDescriptionChange(e.target.value)} />
+				<input className="desc" value={description} onChange={(e) => onDescriptionChange(e.target.value)} />
+				<input className="desc" placeholder="цiна" value={description} onChange={(e) => onDescriptionChange(e.target.value)} />
+				<input className="desc" placeholder="категорiя" value={description} onChange={(e) => onDescriptionChange(e.target.value)} />
 				<div className="hp-entry-actions">
 					<button className="primary" onClick={onAdd}>ВВЕСТИ</button>
 					<button onClick={onClear}>ОЧИСТИТИ</button>

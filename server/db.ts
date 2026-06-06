@@ -43,6 +43,23 @@ ensureTables().catch((err) => {
 
 
 
+const testConnection = async () => {
+  if (!pool) return
+  try {
+    await pool.query('SELECT 1')
+    await ensureTables()
+  } catch (err) {
+    console.error('Failed to connect to Postgres, falling back to mock mode:', err)
+    try {
+      await pool.end()
+    } catch {}
+    // @ts-ignore
+    ;(globalThis as any).__pg_pool = null
+  }
+}
+
+testConnection().catch((err) => console.error('DB test failed:', err))
+
 export const query = (text: string, params?: any[]) => {
   if (!pool) {
     throw new Error('Postgres not configured')
@@ -51,3 +68,4 @@ export const query = (text: string, params?: any[]) => {
 }
 
 export default pool
+ 
