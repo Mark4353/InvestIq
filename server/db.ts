@@ -5,7 +5,14 @@ if (!envDb.databaseUrl) {
   console.warn('DATABASE_URL not set; Postgres disabled')
 }
 
-const pool: Pool | null = envDb.databaseUrl ? new Pool({ connectionString: envDb.databaseUrl }) : null
+const connectionString = envDb.databaseUrl
+const shouldUseSsl = Boolean(
+  connectionString && !connectionString.includes('localhost') && !connectionString.includes('127.0.0.1')
+)
+
+const pool: Pool | null = connectionString
+  ? new Pool({ connectionString, ...(shouldUseSsl ? { ssl: { rejectUnauthorized: false } } : {}) })
+  : null
 
 
 const ensureTables = async () => {
