@@ -21,6 +21,5 @@ app.use('/api/auth', authRouter)
 app.use('/api/transactions', transactionsRouter)
 
 app.listen(env.port, () => {
-  // eslint-disable-next-line no-console
   console.log(`Server listening on port ${env.port}`)
 })
