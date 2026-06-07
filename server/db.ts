@@ -14,7 +14,6 @@ const pool: Pool | null = connectionString
   ? new Pool({ connectionString, ...(shouldUseSsl ? { ssl: { rejectUnauthorized: false } } : {}) })
   : null
 
-
 const ensureTables = async () => {
   if (!pool) return
   const client = await pool.connect()
@@ -48,8 +47,6 @@ ensureTables().catch((err) => {
   console.error('Failed to ensure DB tables:', err)
 })
 
-
-
 const testConnection = async () => {
   if (!pool) return
   try {
@@ -59,15 +56,15 @@ const testConnection = async () => {
     console.error('Failed to connect to Postgres, falling back to mock mode:', err)
     try {
       await pool.end()
-    } catch {}
-    // @ts-ignore
-    ;(globalThis as any).__pg_pool = null
+    } catch {
+      return
+    }
   }
 }
 
 testConnection().catch((err) => console.error('DB test failed:', err))
 
-export const query = (text: string, params?: any[]) => {
+export const query = (text: string, params?: unknown[]) => {
   if (!pool) {
     throw new Error('Postgres not configured')
   }
@@ -75,4 +72,3 @@ export const query = (text: string, params?: any[]) => {
 }
 
 export default pool
- 

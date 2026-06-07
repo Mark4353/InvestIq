@@ -6,13 +6,13 @@ import type {
   RegisterFormData,
   RegisterStatus,
 } from '../types/auth'
+import { apiBase } from '../utils/api'
 
 const initialForm: RegisterFormData = {
   email: '',
   password: '',
 }
 
-const apiBase = (import.meta.env.VITE_API_BASE as string | undefined) ?? ''
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const passwordPolicy = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/

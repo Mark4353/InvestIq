@@ -4,7 +4,9 @@ import "./HomePage.css";
 import type { Transaction } from "../../types"
 import ExpensesTab, { CostsView } from './Costs/Costs'
 import IncomeTab, { IncomeView } from './Income/Income'
+import Summary from './Summary/Summary'
 import Container from '../../container/Container'
+import { apiBase } from '../../utils/api'
 
 type Props = {
   initialTransactions?: Transaction[]
@@ -15,17 +17,21 @@ const HomePage: React.FC<Props> = ({ initialTransactions = [] }) => {
   const [date, setDate] = useState("");
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState("");
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
 
   const { token } = useAuth()
-  const apiBase = (import.meta.env.VITE_API_BASE as string | undefined) ?? ''
+  const [showTooltip, setShowTooltip] = useState<boolean>(() => {
+      try { return !localStorage.getItem('welcome_shown') }
+      catch { return false }
+    })
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const headers: HeadersInit | undefined = token ? { Authorization: `Bearer ${token}` } : undefined
-        const res = await fetch(`${apiBase}/api/transactions`, { headers })
-        if (!res.ok) return
+    useEffect(() => {
+      const load = async () => {
+        try {
+          const headers: HeadersInit | undefined = token ? { Authorization: `Bearer ${token}` } : undefined
+          const res = await fetch(`${apiBase}/api/transactions`, { headers })
+          if (!res.ok) return
         const data = await res.json()
         const tx = (data.transactions ?? []).map((t: unknown) => {
           const item = t as Partial<Transaction> & { amount?: unknown }
@@ -34,17 +40,31 @@ const HomePage: React.FC<Props> = ({ initialTransactions = [] }) => {
         setTransactions(tx)
       } catch (err) {
         console.error('Failed to load transactions', err)
-      }
+      } 
     }
     load()
   }, [token])
+
+  useEffect(() => {
+    if (!showTooltip) return
+    const timer = setTimeout(() => {
+      setShowTooltip(false)
+      try { localStorage.setItem('welcome_shown', '1') } catch (err) { console.warn('localStorage not available', err) }
+    }, 10000)
+    return () => clearTimeout(timer)
+  }, [showTooltip])
+
+  const closeTooltip = () => {
+    setShowTooltip(false)
+    try { localStorage.setItem('welcome_shown', '1') } catch (err) { console.warn('localStorage not available', err) }
+  }
 
   const handleAdd = () => {
     if (!date || !description || !amount) return;
     const payload = {
       date,
       description,
-      category: tab === "expenses" ? 'Default' : 'Income',
+      category: tab === "expenses" ? (category || 'Default') : 'Income',
       amount: Number(amount),
       type: tab === "expenses" ? "expense" : "income",
     }
@@ -72,6 +92,7 @@ const HomePage: React.FC<Props> = ({ initialTransactions = [] }) => {
         setDate("");
         setDescription("");
         setAmount("");
+        setCategory("");
       })
       .catch((err) => console.error('Failed to create transaction', err))
   };
@@ -80,6 +101,7 @@ const HomePage: React.FC<Props> = ({ initialTransactions = [] }) => {
     setDate("");
     setDescription("");
     setAmount("");
+    setCategory("");
   };
 
   const balance = transactions.reduce(
@@ -108,8 +130,12 @@ const HomePage: React.FC<Props> = ({ initialTransactions = [] }) => {
               transactions={transactions}
               date={date}
               description={description}
+              amount={amount}
+              category={category}
               onDateChange={setDate}
               onDescriptionChange={setDescription}
+              onAmountChange={setAmount}
+              onCategoryChange={setCategory}
               onAdd={handleAdd}
               onClear={handleClear}
             />
@@ -118,38 +144,27 @@ const HomePage: React.FC<Props> = ({ initialTransactions = [] }) => {
               transactions={transactions}
               date={date}
               description={description}
+              amount={amount}
+              category={category}
               onDateChange={setDate}
               onDescriptionChange={setDescription}
+              onAmountChange={setAmount}
+              onCategoryChange={setCategory}
               onAdd={handleAdd}
               onClear={handleClear}
             />
           )}
         </div>
 
-        <aside className="hp-right">
-          <div className="summary">ЗВЕДЕННЯ</div>
-          <div className="summary-content">
-            <div>Кількість: {transactions.length}</div>
-            <div>
-              Доходи:{" "}
-              {transactions
-                .filter((t) => t.type === "income")
-                .reduce((s, t) => s + t.amount, 0)
-                .toFixed(2)}
-            </div>
-            <div>
-              Витрати:{" "}
-              {transactions
-                .filter((t) => t.type === "expense")
-                .reduce((s, t) => s + t.amount, 0)
-                .toFixed(2)}
-            </div>
-          </div>
-        </aside>
+        <Summary transactions={transactions} />
 
-        <div className="hp-tooltip">
-          Привіт! Для початку роботи внесіть свій поточний баланс рахунку!
-        </div>
+        {showTooltip && (
+          <div className="hp-tooltip" role="dialog" aria-live="polite">
+            <button className="hp-tooltip-close" onClick={closeTooltip} aria-label="Close">×</button>
+            <div>Привіт! Для початку роботи внесіть свій поточний баланс рахунку!</div>
+            <div style={{marginTop:8, color:'#d7e6ff'}}>Ви не можете витрачати гроші, поки їх у Вас немає :)</div>
+          </div>
+        )}
         </main>
       </Container>
     </div>

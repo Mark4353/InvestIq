@@ -1,0 +1,85 @@
+.header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 12px 20px;
+	background: #ffffff;
+	box-shadow: 0 1px 0 rgba(16,24,40,0.04);
+	gap: 16px;
+}
+
+.logo {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.logo-image {
+	width: 120px;
+	height: auto;
+	display: block;
+}
+
+.logo a {
+	font-weight: 700;
+	font-size: 20px;
+	color: #ff7a00;
+	text-decoration: none;
+}
+
+.header-actions {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.user-area {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.welcome {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	color: #111827;
+	font-weight: 600;
+}
+
+.welcome img {
+	width: 32px;
+	height: 32px;
+	object-fit: cover;
+	border-radius: 50%;
+	background: #f3f4f6;
+}
+
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 8px 12px;
+	border-radius: 8px;
+	font-weight: 600;
+	cursor: pointer;
+	border: none;
+}
+
+.btn.logout {
+	background: #ff5a1f;
+	color: #ffffff;
+}
+
+.btn.logout:hover {
+	opacity: 0.95;
+}
+
+@media (max-width: 600px) {
+	.logo-image { width: 90px; }
+	.logo a { font-size: 16px; }
+	.welcome { font-size: 14px; }
+	.btn { padding: 6px 10px; font-size: 14px; }
+}
+

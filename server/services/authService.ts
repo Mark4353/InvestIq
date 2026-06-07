@@ -63,7 +63,6 @@ export const registerUser = async (payload: AuthPayload) => {
   const { email, password } = validateCredentials(payload)
 
   if (!envDb.databaseUrl) {
-    // mock flow
     for (const u of mockUsers.values()) {
       if (u.email === email) throw new AuthError(409, 'Email already registered.')
     }

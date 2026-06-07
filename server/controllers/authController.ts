@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import { AuthError, loginUser, registerUser, getUserById } from '../services/authService.ts'
+import type { AuthRequest } from '../middleware/authMiddleware.ts'
 
 const sendError = (response: Response, error: unknown) => {
   console.error(error)
@@ -12,8 +13,6 @@ const sendError = (response: Response, error: unknown) => {
 
 export const register = async (request: Request, response: Response) => {
   try {
-    console.log('REGISTER HEADERS:', request.headers)
-    console.log('REGISTER BODY:', request.body)
     const result = await registerUser(request.body)
     response.status(201).json(result)
   } catch (error) {
@@ -30,9 +29,9 @@ export const login = async (request: Request, response: Response) => {
   }
 }
 
-export const me = async (request: Request, response: Response) => {
+export const me = async (request: AuthRequest, response: Response) => {
   try {
-    const userId = (request as any).user?.userId
+    const userId = request.user?.userId
     if (!userId) {
       response.status(401).json({ message: 'Unauthorized' })
       return

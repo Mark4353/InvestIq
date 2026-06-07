@@ -1,6 +1,8 @@
 import './Header.css';
 import { useAuth } from '../../hooks/useAuth'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
+import logoImg from '../../img/logo.png'
+import userIconImg from '../../img/logo.svg'
 
 const Header = () => {
   const { user, logout } = useAuth()
@@ -16,14 +18,14 @@ const Header = () => {
   return (
     <header className="header">
       <div className="logo">
-        <img src="../../img/logo.png" alt="Logo" className="logo-image" />
-        <a href="/home">InvestIQ</a>
+        <img src={logoImg} alt="InvestIQ logo" className="logo-image" />
+        <Link to="/home">InvestIQ</Link>
       </div>
 
       <div className="header-actions">
         {user ? (
           <div className="user-area">
-            <span className="welcome"><img src="../../img/user-icon.png" alt="User Icon" /> {displayName}</span>
+            <span className="welcome"><img src={userIconImg} alt="User Icon" /> {displayName}</span>
             <button className="btn logout" onClick={handleLogout}>
               Logout
             </button>

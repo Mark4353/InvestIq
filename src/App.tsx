@@ -6,7 +6,7 @@ import HomePage from './pages/HomePage/HomePage'
   
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Header />
       <Routes>
         <Route path="/" element={<Register />} />

@@ -7,6 +7,7 @@ import {
 } from 'react'
 import { AuthContext, type AuthContextValue } from './authContext'
 import type { AuthUser } from '../types/auth'
+import { apiBase } from '../utils/api'
 
 const authStorageKey = 'investiq_auth'
 
@@ -47,7 +48,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const tryRefresh = async () => {
       if (session.token && !session.user) {
         try {
-          const apiBase = (import.meta.env.VITE_API_BASE as string | undefined) ?? ''
           const res = await fetch(`${apiBase}/api/auth/me`, {
             headers: { Authorization: `Bearer ${session.token}` },
           })
@@ -55,19 +55,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const data = await res.json()
             setSessionState({ token: session.token, user: data.user })
           } else {
-            
             localStorage.removeItem(authStorageKey)
             setSessionState({ token: null, user: null })
           }
         } catch {
-          
+          return
         }
       }
     }
 
     tryRefresh()
-    
-  }, [])
+  }, [session.token, session.user])
 
   const setSession = useCallback((token: string, user: AuthUser) => {
     const nextSession = {
