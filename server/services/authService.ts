@@ -4,7 +4,6 @@ import jwt from 'jsonwebtoken'
 import { query } from '../db'
 import { db as envDb } from '../config/env'
 
-// In-memory mock store used when Postgres is not configured (development)
 type MockUser = { id: string; email: string; password: string; created_at: string }
 const mockUsers = new Map<string, MockUser>()
 
