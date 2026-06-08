@@ -1,91 +1,95 @@
-import React from "react";
-import "./Income.css";
-import type { Transaction } from "../../../types";
+import type { Transaction } from '../../../types'
+import './Income.css'
 
 type TabProps = {
-  active?: boolean;
-  onClick?: () => void;
-};
+  active?: boolean
+  onClick?: () => void
+}
 
-export const IncomeTab: React.FC<TabProps> = ({ active = false, onClick }) => {
+export const IncomeTab = ({ active = false, onClick }: TabProps) => {
   return (
-    <button className={`hp-tab ${active ? "active" : ""}`} onClick={onClick}>
+    <button className={`hp-tab ${active ? 'active' : ''}`} onClick={onClick}>
       ДОХІД
     </button>
-  );
-};
+  )
+}
 
 type ViewProps = {
-  transactions: Transaction[];
-  date: string;
-  description: string;
-  amount: string;
-  category: string;
-  onDateChange: (v: string) => void;
-  onDescriptionChange: (v: string) => void;
-  onAmountChange: (v: string) => void;
-  onCategoryChange: (v: string) => void;
-  onAdd: () => void;
-  onClear: () => void;
-};
+  transactions: Transaction[]
+  date: string
+  description: string
+  amount: string
+  category: string
+  isSaving?: boolean
+  onDateChange: (value: string) => void
+  onDescriptionChange: (value: string) => void
+  onAmountChange: (value: string) => void
+  onCategoryChange: (value: string) => void
+  onAdd: () => void
+  onClear: () => void
+}
 
-export const IncomeView: React.FC<ViewProps> = ({
+export const IncomeView = ({
   transactions,
   date,
   description,
   amount,
   category,
+  isSaving = false,
   onDateChange,
   onDescriptionChange,
   onAmountChange,
   onCategoryChange,
   onAdd,
   onClear,
-}) => {
+}: ViewProps) => {
   return (
     <>
       <div className="hp-entry">
         <input
           type="date"
           value={date}
-          onChange={(e) => onDateChange(e.target.value)}
+          onChange={(event) => onDateChange(event.target.value)}
         />
         <input
           className="desc"
-          placeholder="Опис товару"
+          placeholder="Опис"
           value={description}
-          onChange={(e) => onDescriptionChange(e.target.value)}
+          onChange={(event) => onDescriptionChange(event.target.value)}
         />
         <input
           className="desc amount"
-          placeholder="цiна"
+          inputMode="decimal"
+          placeholder="Сума"
           value={amount}
-          onChange={(e) => onAmountChange(e.target.value)}
+          onChange={(event) => onAmountChange(event.target.value)}
         />
         <select
           className="desc category"
           value={category}
-          onChange={(e) => onCategoryChange(e.target.value)}
+          onChange={(event) => onCategoryChange(event.target.value)}
         >
           <option value="">Категорія</option>
           <option value="Заробіток">Заробіток</option>
           <option value="Повернення">Повернення</option>
         </select>
         <div className="hp-entry-actions">
-          <button className="primary" onClick={onAdd}>
-            ВВЕСТИ
+          <button className="primary" type="button" onClick={onAdd} disabled={isSaving}>
+            {isSaving ? 'ЗБЕРІГАЄМО...' : 'ВВЕСТИ'}
           </button>
-          <button onClick={onClear}>ОЧИСТИТИ</button>
+          <button type="button" onClick={onClear} disabled={isSaving}>
+            ОЧИСТИТИ
+          </button>
         </div>
       </div>
 
       <table className="hp-table">
         <thead>
           <tr>
-            <th>ДАТА</th>
-            <th>ОПИС</th>
-            <th>КАТЕГОРІЯ</th>
-            <th>СУМА</th>
+            <th>Дата</th>
+            <th>Опис</th>
+            <th>Категорія</th>
+            <th>Сума</th>
           </tr>
         </thead>
         <tbody>
@@ -94,20 +98,20 @@ export const IncomeView: React.FC<ViewProps> = ({
               <td colSpan={4}>Немає записів</td>
             </tr>
           )}
-          {transactions.map((t) => (
-            <tr key={t.id}>
-              <td>{t.date}</td>
-              <td>{t.description}</td>
-              <td>{t.category}</td>
-              <td className={t.type === "expense" ? "neg" : "pos"}>
-                {t.amount.toFixed(2)}
+          {transactions.map((transaction) => (
+            <tr key={transaction.id}>
+              <td>{transaction.date}</td>
+              <td>{transaction.description}</td>
+              <td>{transaction.category}</td>
+              <td className={transaction.type === 'expense' ? 'neg' : 'pos'}>
+                {transaction.amount.toFixed(2)}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
     </>
-  );
-};
+  )
+}
 
-export default IncomeTab;
+export default IncomeTab

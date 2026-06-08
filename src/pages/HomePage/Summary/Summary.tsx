@@ -1,38 +1,48 @@
-import React from "react";
-import "./Summary.css";
-import type { Transaction } from "../../../types";
+import type { Transaction } from '../../../types'
+import './Summary.css'
 
-type Props = { transactions: Transaction[] };
-
-const monthNames = [
-  "Січень",
-  "Лютий",
-  "Березень",
-  "Квітень",
-  "Травень",
-  "Червень",
-  "Липень",
-  "Серпень",
-  "Вересень",
-  "Жовтень",
-  "Листопад",
-  "Грудень",
-];
-
-function getMonthlyTotals(transactions: Transaction[]) {
-  const map = new Map<number, number>();
-  transactions.forEach((t) => {
-    const d = new Date(t.date);
-    const m = d.getMonth();
-    const prev = map.get(m) ?? 0;
-    const delta = t.type === "income" ? t.amount : -t.amount;
-    map.set(m, prev + delta);
-  });
-  return map;
+type Props = {
+  transactions: Transaction[]
 }
 
-const Summary: React.FC<Props> = ({ transactions }) => {
-  const totals = getMonthlyTotals(transactions);
+const monthNames = [
+  'Січень',
+  'Лютий',
+  'Березень',
+  'Квітень',
+  'Травень',
+  'Червень',
+  'Липень',
+  'Серпень',
+  'Вересень',
+  'Жовтень',
+  'Листопад',
+  'Грудень',
+]
+
+const getMonthlyTotals = (transactions: Transaction[]) => {
+  const totals = new Map<number, number>()
+
+  for (const transaction of transactions) {
+    const month = new Date(transaction.date).getMonth()
+    const currentTotal = totals.get(month) ?? 0
+    const amount =
+      transaction.type === 'income' ? transaction.amount : -transaction.amount
+
+    totals.set(month, currentTotal + amount)
+  }
+
+  return totals
+}
+
+const Summary = ({ transactions }: Props) => {
+  const totals = getMonthlyTotals(transactions)
+  const incomeTotal = transactions
+    .filter((transaction) => transaction.type === 'income')
+    .reduce((total, transaction) => total + transaction.amount, 0)
+  const expenseTotal = transactions
+    .filter((transaction) => transaction.type === 'expense')
+    .reduce((total, transaction) => total + transaction.amount, 0)
 
   return (
     <aside className="hp-right" aria-label="Зведення">
@@ -42,39 +52,27 @@ const Summary: React.FC<Props> = ({ transactions }) => {
           Кількість: <span>{transactions.length}</span>
         </div>
         <div className="summary-row">
-          Доходи:{" "}
-          <span>
-            {transactions
-              .filter((t) => t.type === "income")
-              .reduce((s, t) => s + t.amount, 0)
-              .toFixed(2)}
-          </span>
+          Доходи: <span>{incomeTotal.toFixed(2)}</span>
         </div>
         <div className="summary-row">
-          Витрати:{" "}
-          <span>
-            {transactions
-              .filter((t) => t.type === "expense")
-              .reduce((s, t) => s + t.amount, 0)
-              .toFixed(2)}
-          </span>
+          Витрати: <span>{expenseTotal.toFixed(2)}</span>
         </div>
 
         <div className="summary-months">
           {Array.from(totals.entries())
-            .sort((a, b) => b[0] - a[0])
-            .map(([m, val]) => (
-              <div className="month-row" key={m}>
-                <div className="month">{monthNames[m]}</div>
-                <div className={`month-amount ${val < 0 ? "neg" : "pos"}`}>
-                  {val.toFixed(2)}
+            .sort((firstTotal, secondTotal) => secondTotal[0] - firstTotal[0])
+            .map(([month, value]) => (
+              <div className="month-row" key={month}>
+                <div className="month">{monthNames[month]}</div>
+                <div className={`month-amount ${value < 0 ? 'neg' : 'pos'}`}>
+                  {value.toFixed(2)}
                 </div>
               </div>
             ))}
         </div>
       </div>
     </aside>
-  );
-};
+  )
+}
 
-export default Summary;
+export default Summary

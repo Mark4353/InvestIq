@@ -1,113 +1,226 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+import Container from '../../container/Container'
 import { useAuth } from '../../hooks/useAuth'
-import "./HomePage.css";
-import type { Transaction } from "../../types"
+import type { Transaction } from '../../types'
+import { apiBase } from '../../utils/api'
 import ExpensesTab, { CostsView } from './Costs/Costs'
+import './HomePage.css'
 import IncomeTab, { IncomeView } from './Income/Income'
 import Summary from './Summary/Summary'
-import Container from '../../container/Container'
-import { apiBase } from '../../utils/api'
 
 type Props = {
   initialTransactions?: Transaction[]
 }
 
-const HomePage: React.FC<Props> = ({ initialTransactions = [] }) => {
-  const [tab, setTab] = useState<"expenses" | "income">("expenses");
-  const [date, setDate] = useState("");
-  const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState("");
-  const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
+type TransactionType = 'expense' | 'income'
 
+const localTransactionsKey = 'investiq_transactions'
+
+const normalizeTransaction = (value: unknown): Transaction => {
+  const item = value as Partial<Transaction> & { amount?: unknown }
+
+  return {
+    id: String(item.id ?? crypto.randomUUID()),
+    date: String(item.date ?? ''),
+    description: String(item.description ?? ''),
+    category: String(item.category ?? ''),
+    amount: Number(item.amount ?? 0),
+    type: item.type === 'income' ? 'income' : 'expense',
+  }
+}
+
+const readLocalTransactions = (): Transaction[] => {
+  try {
+    const storedValue = localStorage.getItem(localTransactionsKey)
+    if (!storedValue) return []
+
+    const parsedValue = JSON.parse(storedValue) as unknown[]
+    return parsedValue.map(normalizeTransaction)
+  } catch {
+    return []
+  }
+}
+
+const saveLocalTransactions = (transactions: Transaction[]) => {
+  try {
+    localStorage.setItem(localTransactionsKey, JSON.stringify(transactions))
+  } catch {
+    return
+  }
+}
+
+const createLocalTransaction = (
+  type: TransactionType,
+  date: string,
+  description: string,
+  amount: number,
+  category: string,
+): Transaction => ({
+  id: crypto.randomUUID(),
+  date,
+  description,
+  category: type === 'expense' ? category || 'Інше' : category || 'Дохід',
+  amount,
+  type,
+})
+
+const HomePage = ({ initialTransactions = [] }: Props) => {
+  const [tab, setTab] = useState<TransactionType>('expense')
+  const [date, setDate] = useState('')
+  const [description, setDescription] = useState('')
+  const [amount, setAmount] = useState('')
+  const [category, setCategory] = useState('')
+  const [transactions, setTransactions] = useState<Transaction[]>(
+    initialTransactions.length > 0 ? initialTransactions : readLocalTransactions,
+  )
+  const [formMessage, setFormMessage] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
   const { token } = useAuth()
   const [showTooltip, setShowTooltip] = useState<boolean>(() => {
-      try { return !localStorage.getItem('welcome_shown') }
-      catch { return false }
-    })
+    try {
+      return !localStorage.getItem('welcome_shown')
+    } catch {
+      return false
+    }
+  })
 
-    useEffect(() => {
-      const load = async () => {
-        try {
-          const headers: HeadersInit | undefined = token ? { Authorization: `Bearer ${token}` } : undefined
-          const res = await fetch(`${apiBase}/api/transactions`, { headers })
-          if (!res.ok) return
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const headers: HeadersInit | undefined = token
+          ? { Authorization: `Bearer ${token}` }
+          : undefined
+        const res = await fetch(`${apiBase}/api/transactions`, { headers })
+        if (!res.ok) return
+
         const data = await res.json()
-        const tx = (data.transactions ?? []).map((t: unknown) => {
-          const item = t as Partial<Transaction> & { amount?: unknown }
-          return { ...(item as Transaction), amount: Number(item.amount ?? 0) } as Transaction
-        })
-        setTransactions(tx)
+        const nextTransactions = (data.transactions ?? []).map(normalizeTransaction)
+        setTransactions(nextTransactions)
+        saveLocalTransactions(nextTransactions)
       } catch (err) {
         console.error('Failed to load transactions', err)
-      } 
+      }
     }
+
     load()
   }, [token])
 
   useEffect(() => {
     if (!showTooltip) return
+
     const timer = setTimeout(() => {
       setShowTooltip(false)
-      try { localStorage.setItem('welcome_shown', '1') } catch (err) { console.warn('localStorage not available', err) }
+      try {
+        localStorage.setItem('welcome_shown', '1')
+      } catch (err) {
+        console.warn('localStorage not available', err)
+      }
     }, 10000)
+
     return () => clearTimeout(timer)
   }, [showTooltip])
 
+  const filteredTransactions = useMemo(
+    () => transactions.filter((transaction) => transaction.type === tab),
+    [tab, transactions],
+  )
+
+  const balance = useMemo(
+    () =>
+      transactions.reduce(
+        (total, transaction) =>
+          transaction.type === 'income'
+            ? total + transaction.amount
+            : total - transaction.amount,
+        0,
+      ),
+    [transactions],
+  )
+
   const closeTooltip = () => {
     setShowTooltip(false)
-    try { localStorage.setItem('welcome_shown', '1') } catch (err) { console.warn('localStorage not available', err) }
+    try {
+      localStorage.setItem('welcome_shown', '1')
+    } catch (err) {
+      console.warn('localStorage not available', err)
+    }
   }
 
-  const handleAdd = () => {
-    if (!date || !description || !amount) return;
-    const payload = {
-      date,
-      description,
-      category: tab === "expenses" ? (category || 'Default') : 'Income',
-      amount: Number(amount),
-      type: tab === "expenses" ? "expense" : "income",
+  const resetForm = () => {
+    setDate('')
+    setDescription('')
+    setAmount('')
+    setCategory('')
+    setFormMessage('')
+  }
+
+  const persistTransaction = (transaction: Transaction) => {
+    setTransactions((currentTransactions) => {
+      const nextTransactions = [transaction, ...currentTransactions]
+      saveLocalTransactions(nextTransactions)
+      return nextTransactions
+    })
+  }
+
+  const handleAdd = async () => {
+    const trimmedDescription = description.trim()
+    const normalizedAmount = Number(amount.replace(',', '.'))
+
+    if (!date || !trimmedDescription || !amount) {
+      setFormMessage('Заповніть дату, опис і суму.')
+      return
     }
 
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-    if (token) headers.Authorization = `Bearer ${token}`
+    if (!Number.isFinite(normalizedAmount) || normalizedAmount <= 0) {
+      setFormMessage('Введіть коректну суму більше нуля.')
+      return
+    }
 
-    fetch(`${apiBase}/api/transactions`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(payload),
-    })
-      .then((r) => r.json())
-      .then((data) => {
-        const raw = data.transaction
-        const t: Transaction = {
-          id: raw.id,
-          date: raw.date,
-          description: raw.description ?? '',
-          category: raw.category ?? '',
-          amount: Number(raw.amount),
-          type: raw.type,
-        }
-        setTransactions((prev) => [t, ...prev])
-        setDate("");
-        setDescription("");
-        setAmount("");
-        setCategory("");
+    const transactionType: TransactionType = tab
+    const localTransaction = createLocalTransaction(
+      transactionType,
+      date,
+      trimmedDescription,
+      normalizedAmount,
+      category,
+    )
+
+    setIsSaving(true)
+    setFormMessage('')
+
+    try {
+      if (!token) {
+        persistTransaction(localTransaction)
+        resetForm()
+        return
+      }
+
+      const response = await fetch(`${apiBase}/api/transactions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(localTransaction),
       })
-      .catch((err) => console.error('Failed to create transaction', err))
-  };
 
-  const handleClear = () => {
-    setDate("");
-    setDescription("");
-    setAmount("");
-    setCategory("");
-  };
+      if (!response.ok) {
+        throw new Error('Failed to create transaction')
+      }
 
-  const balance = transactions.reduce(
-    (acc, t) => (t.type === "income" ? acc + t.amount : acc - t.amount),
-    0,
-  );
+      const data = await response.json()
+      persistTransaction(normalizeTransaction(data.transaction))
+      resetForm()
+    } catch (err) {
+      console.error('Failed to create transaction', err)
+      persistTransaction(localTransaction)
+      resetForm()
+      setFormMessage('Запис збережено локально. API зараз недоступний.')
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   return (
     <div className="home-page">
@@ -116,59 +229,81 @@ const HomePage: React.FC<Props> = ({ initialTransactions = [] }) => {
           <div className="label">Баланс:</div>
           <div className="amount">{balance.toFixed(2)} UAH</div>
         </div>
-        <main className="hp-card">
-        <div className="hp-left">
-          <div className="hp-tabs">
-            <div style={{ display: 'flex', gap: 8 }}>
-              <ExpensesTab active={tab === 'expenses'} onClick={() => setTab('expenses')} />
-              <IncomeTab active={tab === 'income'} onClick={() => setTab('income')} />
-            </div>
-          </div>
-
-          {tab === 'expenses' ? (
-            <CostsView
-              transactions={transactions}
-              date={date}
-              description={description}
-              amount={amount}
-              category={category}
-              onDateChange={setDate}
-              onDescriptionChange={setDescription}
-              onAmountChange={setAmount}
-              onCategoryChange={setCategory}
-              onAdd={handleAdd}
-              onClear={handleClear}
-            />
-          ) : (
-            <IncomeView
-              transactions={transactions}
-              date={date}
-              description={description}
-              amount={amount}
-              category={category}
-              onDateChange={setDate}
-              onDescriptionChange={setDescription}
-              onAmountChange={setAmount}
-              onCategoryChange={setCategory}
-              onAdd={handleAdd}
-              onClear={handleClear}
-            />
-          )}
+        <div className="hp-analytics-link-wrap">
+          <Link className="hp-analytics-link" to="/analytics">
+            Перейти до аналітики
+          </Link>
         </div>
 
-        <Summary transactions={transactions} />
+        <main className="hp-card">
+          <div className="hp-left">
+            <div className="hp-tabs">
+              <ExpensesTab
+                active={tab === 'expense'}
+                onClick={() => setTab('expense')}
+              />
+              <IncomeTab
+                active={tab === 'income'}
+                onClick={() => setTab('income')}
+              />
+            </div>
 
-        {showTooltip && (
-          <div className="hp-tooltip" role="dialog" aria-live="polite">
-            <button className="hp-tooltip-close" onClick={closeTooltip} aria-label="Close">×</button>
-            <div>Привіт! Для початку роботи внесіть свій поточний баланс рахунку!</div>
-            <div style={{marginTop:8, color:'#d7e6ff'}}>Ви не можете витрачати гроші, поки їх у Вас немає :)</div>
+            {formMessage && <p className="hp-form-message">{formMessage}</p>}
+
+            {tab === 'expense' ? (
+              <CostsView
+                transactions={filteredTransactions}
+                date={date}
+                description={description}
+                amount={amount}
+                category={category}
+                isSaving={isSaving}
+                onDateChange={setDate}
+                onDescriptionChange={setDescription}
+                onAmountChange={setAmount}
+                onCategoryChange={setCategory}
+                onAdd={handleAdd}
+                onClear={resetForm}
+              />
+            ) : (
+              <IncomeView
+                transactions={filteredTransactions}
+                date={date}
+                description={description}
+                amount={amount}
+                category={category}
+                isSaving={isSaving}
+                onDateChange={setDate}
+                onDescriptionChange={setDescription}
+                onAmountChange={setAmount}
+                onCategoryChange={setCategory}
+                onAdd={handleAdd}
+                onClear={resetForm}
+              />
+            )}
           </div>
-        )}
+
+          <Summary transactions={transactions} />
+
+          {showTooltip && (
+            <div className="hp-tooltip" role="dialog" aria-live="polite">
+              <button
+                className="hp-tooltip-close"
+                onClick={closeTooltip}
+                aria-label="Close"
+              >
+                ×
+              </button>
+              <div>Привіт! Для початку роботи внесіть свій поточний баланс рахунку.</div>
+              <div style={{ marginTop: 8, color: '#d7e6ff' }}>
+                Ви не можете витрачати гроші, поки їх у вас немає :)
+              </div>
+            </div>
+          )}
         </main>
       </Container>
     </div>
-  );
-};
+  )
+}
 
-export default HomePage;
+export default HomePage

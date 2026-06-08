@@ -15,8 +15,8 @@
 }
 
 .logo-image {
-	width: 120px;
-	height: auto;
+	width: 39px;
+	height: 31px;
 	display: block;
 }
 
@@ -77,7 +77,7 @@
 }
 
 @media (max-width: 600px) {
-	.logo-image { width: 90px; }
+	.logo-image { width: 34px; height: 27px; }
 	.logo a { font-size: 16px; }
 	.welcome { font-size: 14px; }
 	.btn { padding: 6px 10px; font-size: 14px; }
