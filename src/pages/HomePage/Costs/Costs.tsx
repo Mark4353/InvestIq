@@ -1,4 +1,5 @@
 import type { Transaction } from '../../../types'
+import { expenseCategories } from '../../../utils/categories'
 import './Costs.css'
 
 type TabProps = {
@@ -70,9 +71,11 @@ export const CostsView = ({
           onChange={(event) => onCategoryChange(event.target.value)}
         >
           <option value="">Категорія</option>
-          <option value="Транспорт">Транспорт</option>
-          <option value="Продукти">Продукти</option>
-          <option value="Розваги">Розваги</option>
+          {expenseCategories.map((expenseCategory) => (
+            <option value={expenseCategory} key={expenseCategory}>
+              {expenseCategory}
+            </option>
+          ))}
         </select>
         <div className="hp-entry-actions">
           <button className="primary" type="button" onClick={onAdd} disabled={isSaving}>

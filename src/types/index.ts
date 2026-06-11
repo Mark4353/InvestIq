@@ -10,3 +10,9 @@ export interface Transaction {
 }
 
 export type Transactions = Transaction[]
+export type TransactionType = Transaction['type']
+
+export type CategoryTotal = {
+  name: string
+  amount: number
+}

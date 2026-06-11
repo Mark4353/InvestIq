@@ -1,24 +1,10 @@
 import type { Transaction } from '../../../types'
+import { monthNames } from '../../../hooks/useAnalyticsReport'
 import './Summary.css'
 
 type Props = {
   transactions: Transaction[]
 }
-
-const monthNames = [
-  'Січень',
-  'Лютий',
-  'Березень',
-  'Квітень',
-  'Травень',
-  'Червень',
-  'Липень',
-  'Серпень',
-  'Вересень',
-  'Жовтень',
-  'Листопад',
-  'Грудень',
-]
 
 const getMonthlyTotals = (transactions: Transaction[]) => {
   const totals = new Map<number, number>()
