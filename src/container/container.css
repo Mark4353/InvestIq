@@ -1,32 +1,40 @@
-
 .container {
-	box-sizing: border-box;
-	width: 100%;
-	max-width: 1180px;
-	margin-left: auto;
-	margin-right: auto;
-	padding-left: 20px;
-	padding-right: 20px;
-	padding-top: 24px;
-	padding-bottom: 24px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1180px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-top: 24px;
+  padding-bottom: 24px;
 }
-
 
 .container--center {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: flex-start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
 }
 
-
 .container--full-bleed {
-	width: 100%;
-	padding-left: 16px;
-	padding-right: 16px;
+  width: 100%;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
 @media (max-width: 640px) {
-	.container { padding-left: 12px; padding-right: 12px; }
+  .container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
 }
 
+@media (max-width: 480px) {
+  .container {
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+}

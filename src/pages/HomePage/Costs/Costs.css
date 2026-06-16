@@ -35,7 +35,7 @@
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   flex: 1 1 220px;
-  min-width: 120px;
+  min-width: 0;
 }
 
 .hp-entry .amount {
@@ -85,5 +85,41 @@
     width: 100%;
     justify-content: flex-start;
     margin-top: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hp-entry {
+    gap: 8px;
+  }
+  .hp-entry input[type="date"],
+  .hp-entry .desc,
+  .hp-entry .amount,
+  .hp-entry .category {
+    flex: 0 0 100%;
+    width: 100%;
+  }
+  .hp-entry .desc {
+    min-width: 0;
+  }
+  .hp-entry .amount,
+  .hp-entry .category {
+    margin: 0;
+  }
+  .hp-entry-actions {
+    margin-left: 0;
+    width: 100%;
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .hp-entry-actions button {
+    flex: 1 1 0;
+    width: 100%;
+    padding: 12px 10px;
+  }
+  .hp-entry .primary {
+    padding: 12px;
+    border-radius: 10px;
   }
 }

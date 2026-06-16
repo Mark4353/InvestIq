@@ -56,7 +56,8 @@
 
 .hp-card {
   margin: 24px auto;
-  max-width: 1200px;
+  max-width: 100%;
+  width: 100%;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), #ffffff);
   border-radius: 24px;
   padding: 30px;
@@ -100,12 +101,12 @@
   border-radius: 12px;
   border: 1px solid #f0f0f4;
   background: #fbfbfd;
+  flex: 1;
+  min-width: 0;
 }
 .hp-entry input[type="date"] {
-  width: 160px;
-}
-.hp-entry .desc {
-  flex: 1;
+  flex: 0 0 160px;
+  min-width: 0;
 }
 .hp-entry-actions {
   display: flex;
@@ -217,5 +218,39 @@
   .hp-tooltip {
     left: 20px;
     transform: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .hp-card {
+    padding: 16px;
+    gap: 12px;
+  }
+  .hp-analytics-link {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+  .hp-right {
+    padding: 12px;
+  }
+  .hp-entry {
+    gap: 8px;
+  }
+  /* Reduce table paddings on very small screens to avoid overflow */
+  .hp-table thead th {
+    padding: 8px 8px;
+    font-size: 12px;
+  }
+  .hp-table tbody td {
+    padding: 8px 8px;
+    font-size: 13px;
+  }
+  .hp-table .empty td {
+    padding: 24px 8px;
+  }
+  .hp-table thead th,
+  .hp-table tbody td {
+    white-space: normal;
+    word-break: break-word;
   }
 }

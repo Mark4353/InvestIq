@@ -193,6 +193,7 @@ const HomePage = ({ initialTransactions = [] }: Props) => {
       </Container>
     </div>
   )
+  
 }
 
 export default HomePage

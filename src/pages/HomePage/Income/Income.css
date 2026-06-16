@@ -1,40 +1,101 @@
-.hp-tab{
-	border-radius: 20px;
-	padding: 8px 18px;
-	border: none;
-	background: transparent;
-	color: #666;
-	font-weight:700;
-	cursor: pointer;
+.hp-tab {
+  border-radius: 20px;
+  padding: 8px 18px;
+  border: none;
+  background: transparent;
+  color: #666;
+  font-weight: 700;
+  cursor: pointer;
 }
-.hp-tab.active{
-	background: rgba(255,255,255,0.9);
-	color: #111;
-}
-
-.hp-entry{
-	display:flex;
-	gap:12px;
-	align-items:center;
-	margin:12px 0 18px 0;
-	flex-wrap:wrap;
-}
-.field-label{
-	font-size:14px;
-	color:#6B7280;
-	margin-right:6px;
-}
-.hp-entry input[type="date"]{ padding:8px 10px; border-radius:8px; border:1px solid #E5E7EB; background:#fff; flex:0 0 150px }
-.hp-entry .desc{ padding:10px 12px; border:1px solid #E5E7EB; border-radius:8px; flex:1 1 220px }
-.hp-entry .amount{ flex:0 0 110px }
-.hp-entry .category{ flex:0 0 150px }
-.hp-entry-actions{ display:flex; gap:8px; margin-left:auto }
-
-@media (max-width:920px){
-	.hp-entry{ flex-wrap:wrap }
-	.hp-entry input[type="date"]{ flex:0 0 100% }
-	.hp-entry .desc{ flex:1 1 100% }
-	.hp-entry .amount, .hp-entry .category{ flex:0 0 48% }
-	.hp-entry-actions{ margin-left:0; width:100%; justify-content:flex-start; margin-top:8px }
+.hp-tab.active {
+  background: rgba(255, 255, 255, 0.9);
+  color: #111;
 }
 
+.hp-entry {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 12px 0 18px 0;
+  flex-wrap: wrap;
+}
+.field-label {
+  font-size: 14px;
+  color: #6b7280;
+  margin-right: 6px;
+}
+.hp-entry input[type="date"] {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  flex: 0 0 150px;
+}
+.hp-entry .desc {
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  flex: 1 1 220px;
+  min-width: 0;
+}
+.hp-entry .amount {
+  flex: 0 0 110px;
+}
+.hp-entry .category {
+  flex: 0 0 150px;
+}
+.hp-entry-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+@media (max-width: 920px) {
+  .hp-entry {
+    flex-wrap: wrap;
+  }
+  .hp-entry input[type="date"] {
+    flex: 0 0 100%;
+  }
+  .hp-entry .desc {
+    flex: 1 1 100%;
+  }
+  .hp-entry .amount,
+  .hp-entry .category {
+    flex: 0 0 48%;
+  }
+  .hp-entry-actions {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-start;
+    margin-top: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hp-entry {
+    gap: 8px;
+  }
+  .hp-entry input[type="date"],
+  .hp-entry .desc,
+  .hp-entry .amount,
+  .hp-entry .category {
+    flex: 0 0 100%;
+    width: 100%;
+  }
+  .hp-entry .desc {
+    min-width: 0;
+  }
+  .hp-entry-actions {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    margin-top: 8px;
+    margin-left: 0;
+  }
+  .hp-entry-actions button {
+    flex: 1 1 0;
+    width: 100%;
+    padding: 12px 10px;
+  }
+}
